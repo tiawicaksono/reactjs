@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Col, Form, Row } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Form,
+  Pagination,
+  Row,
+  Spinner,
+  Container,
+} from "react-bootstrap";
 import { API_URL } from "../utils/api";
 import axios from "axios";
 import ListProduct from "./ListProduct";
@@ -16,13 +24,18 @@ const defaultValue = {
 const sortingValue = {
   sort: "",
   q: "",
-  cat: "",
+  cat: "name",
+  min: "",
+  max: "",
 };
 function FormProduct() {
   const [data, setData] = useState(defaultValue);
   const [posts, setPosts] = useState([]);
   const [isUpdate, setUpdate] = useState(false);
   const [queryParam, setQueryParam] = useState(sortingValue);
+  const [pagination, setPagination] = useState({});
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   /**
    * CREATE
@@ -63,16 +76,19 @@ function FormProduct() {
    * SHOW ALL PRODUCT
    */
   const showData = useCallback(async () => {
+    setIsLoading(true);
     const response = await axios(
-      `${API_URL}?sort=${queryParam.sort}&cat=${queryParam.name}&q=${queryParam.q}`
+      `${API_URL}?sort=${queryParam.sort}&cat=${queryParam.cat}&q=${queryParam.q}&page=${page}&min=${queryParam.min}&max=${queryParam.max}`
     );
-    setPosts(response.data);
-  }, [queryParam]);
+    setPosts(response.data.data);
+    setPagination(response.data);
+    setIsLoading(false);
+  }, [queryParam, page]);
 
   useEffect(() => {
     // console.log(queryParam);
     showData();
-  }, [queryParam]);
+  }, [queryParam, page]);
 
   /**
    * SEARCH
@@ -82,75 +98,130 @@ function FormProduct() {
     setQueryParam(params);
   }
 
-  return (
-    <Row className="mt-4 px-4">
-      <Col md={4}>
-        <Form onSubmit={(e) => submit(e)} className="create-form">
-          <Form.Group className="mb-3">
-            {/* <Form.Label htmlFor="name">Name</Form.Label> */}
-            <Form.Control
-              onChange={(e) => handle(e)}
-              id="name"
-              value={data.name || ""}
-              type="text"
-              placeholder="product name"
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Control
-              onChange={(e) => handle(e)}
-              id="description"
-              value={data.description || ""}
-              as="textarea"
-              rows={3}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Control
-              onChange={(e) => handle(e)}
-              id="price"
-              value={data.price || ""}
-              type="number"
-              placeholder="price"
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Control
-              onChange={(e) => handle(e)}
-              id="qty"
-              value={data.qty || ""}
-              type="number"
-              placeholder="qty"
-            />
-          </Form.Group>
-          <Form.Group controlId="formFile" className="mb-3">
-            <Form.Control type="file" onChange={(e) => uploadImage(e)} />
-          </Form.Group>
-          <Button variant="primary" type="submit">
-            Submit
-          </Button>
-        </Form>
-      </Col>
-      <Col md={8}>
-        <FormSearch
-          setQueryParam={(a) => handleChangeQueryParams(a)}
-          queryParam={queryParam}
+  function renderItem() {
+    if (posts) {
+      // console.log(posts);
+      if (posts.length < 1) {
+        return <p>tidak ada</p>;
+      }
+      return posts.map((produks) => (
+        <ListProduct
+          key={produks.id}
+          dataProduk={produks}
+          showData={showData}
+          setData={setData}
+          setUpdate={setUpdate}
         />
-        <Row>
-          {posts && posts.length < 1 && <p>tidak ada</p>}
-          {posts &&
-            posts.map((produks) => (
-              <ListProduct
-                key={produks.id}
-                dataProduk={produks}
-                showData={showData}
-                setData={setData}
-                setUpdate={setUpdate}
-              />
-            ))}
+      ));
+    }
+  }
+
+  function getLastUrl(params) {
+    return params.charAt(params.length - 1);
+  }
+  function renderPagination() {
+    if (pagination && pagination.links) {
+      console.log(pagination);
+      return (
+        <Pagination>
+          {pagination.first_page_url && (
+            <Pagination.First onClick={(a) => setPage(1)} />
+          )}
+          {pagination.prev_page_url && (
+            <Pagination.Prev
+              onClick={(a) => setPage(getLastUrl(pagination.prev_page_url))}
+            />
+          )}
+          {pagination.links.map((pager, i) => {
+            if (i != 0 && i != pagination.links.length - 1) {
+              return (
+                <Pagination.Item
+                  active={pager.active}
+                  onClick={(a) => setPage(pager.label)}
+                >
+                  {pager.label}
+                </Pagination.Item>
+              );
+            }
+            return null;
+          })}
+          {pagination.next_page_url && (
+            <Pagination.Next
+              onClick={(a) => setPage(getLastUrl(pagination.next_page_url))}
+            />
+          )}
+          {pagination.last_page_url && (
+            <Pagination.Last onClick={(a) => setPage(pagination.last_page)} />
+          )}
+        </Pagination>
+      );
+    }
+  }
+
+  return (
+    <Container>
+      {isLoading ? (
+        <Spinner animation="grow" className="mt-4" />
+      ) : (
+        <Row className="mt-4 px-4">
+          <Col md={4}>
+            <Form onSubmit={(e) => submit(e)} className="create-form">
+              <Form.Group className="mb-3">
+                {/* <Form.Label htmlFor="name">Name</Form.Label> */}
+                <Form.Control
+                  onChange={(e) => handle(e)}
+                  id="name"
+                  value={data.name || ""}
+                  type="text"
+                  placeholder="product name"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Control
+                  onChange={(e) => handle(e)}
+                  id="description"
+                  value={data.description || ""}
+                  as="textarea"
+                  rows={3}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Control
+                  onChange={(e) => handle(e)}
+                  id="price"
+                  value={data.price || ""}
+                  type="number"
+                  placeholder="price"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Control
+                  onChange={(e) => handle(e)}
+                  id="qty"
+                  value={data.qty || ""}
+                  type="number"
+                  placeholder="qty"
+                />
+              </Form.Group>
+              <Form.Group controlId="formFile" className="mb-3">
+                <Form.Control type="file" onChange={(e) => uploadImage(e)} />
+              </Form.Group>
+              <Button variant="primary" type="submit">
+                Submit
+              </Button>
+            </Form>
+          </Col>
+          <Col md={8}>
+            <FormSearch
+              setQueryParam={(a) => handleChangeQueryParams(a)}
+              queryParam={queryParam}
+            />
+            <Row>{renderItem()}</Row>
+            <Row>{renderPagination()}</Row>
+          </Col>
         </Row>
-      </Col>
-    </Row>
+      )}
+    </Container>
   );
 }
 

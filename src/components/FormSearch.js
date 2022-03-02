@@ -30,6 +30,11 @@ export const FormSearch = (props) => {
         searchQty: "show",
       });
     }
+
+    const newData = { ...props.queryParam };
+    newData.cat = params;
+
+    props.setQueryParam(newData);
   };
 
   const handleSortingSearchBox = async (params) => {
@@ -47,6 +52,13 @@ export const FormSearch = (props) => {
     props.setQueryParam(newData);
     // props.showData();
   };
+
+  const handlePriceSearchBox = (type, value) => {
+    const newData = { ...props.queryParam };
+    newData[type] = value;
+    console.log(newData);
+    props.setQueryParam(newData);
+  };
   return (
     <Form className="mb-2">
       <Row>
@@ -62,10 +74,20 @@ export const FormSearch = (props) => {
               <div className={show.searchPrice}>
                 <Row>
                   <Col>
-                    <Form.Control placeholder="price min" />
+                    <Form.Control
+                      placeholder="price min"
+                      onChange={(e) =>
+                        handlePriceSearchBox("min", e.target.value)
+                      }
+                    />
                   </Col>
                   <Col>
-                    <Form.Control placeholder="price max" />
+                    <Form.Control
+                      placeholder="price max"
+                      onChange={(e) =>
+                        handlePriceSearchBox("max", e.target.value)
+                      }
+                    />
                   </Col>
                 </Row>
               </div>
@@ -73,10 +95,20 @@ export const FormSearch = (props) => {
               <div className={show.searchQty}>
                 <Row>
                   <Col>
-                    <Form.Control placeholder="qty min" />
+                    <Form.Control
+                      placeholder="qty min"
+                      onChange={(e) =>
+                        handlePriceSearchBox("min", e.target.value)
+                      }
+                    />
                   </Col>
                   <Col>
-                    <Form.Control placeholder="qty max" />
+                    <Form.Control
+                      placeholder="qty max"
+                      onChange={(e) =>
+                        handlePriceSearchBox("max", e.target.value)
+                      }
+                    />
                   </Col>
                 </Row>
               </div>
