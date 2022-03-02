@@ -3,6 +3,7 @@ import { Button, Col, Form, Row } from "react-bootstrap";
 import { API_URL } from "../utils/api";
 import axios from "axios";
 import ListProduct from "./ListProduct";
+import { FormSearch } from "./FormSearch";
 
 const defaultValue = {
   name: "",
@@ -11,49 +12,21 @@ const defaultValue = {
   qty: "",
   image: "",
 };
+
+const sortingValue = {
+  sort: "",
+  q: "",
+  cat: "",
+};
 function FormProduct() {
   const [data, setData] = useState(defaultValue);
   const [posts, setPosts] = useState([]);
   const [isUpdate, setUpdate] = useState(false);
-  const [show, setShow] = useState({
-    searchNama: "show",
-    searchPrice: "hide",
-    searchQty: "hide",
-  });
-  const [sorting, setSorting] = useState({});
+  const [queryParam, setQueryParam] = useState(sortingValue);
 
-  /**
-   * SEARCH BOX
-   */
-  const handleSelectSearchBox = async (params) => {
-    if (params === "name") {
-      setShow({
-        searchNama: "show",
-        searchPrice: "hide",
-        searchQty: "hide",
-      });
-    } else if (params === "price") {
-      setShow({
-        searchNama: "hide",
-        searchPrice: "show",
-        searchQty: "hide",
-      });
-    } else {
-      setShow({
-        searchNama: "hide",
-        searchPrice: "hide",
-        searchQty: "show",
-      });
-    }
-  };
-
-  const handleSortingSearchBox = async (params) => {
-    console.log(params);
-  };
   /**
    * CREATE
    */
-
   function submit(params) {
     params.preventDefault();
     let formData = new FormData();
@@ -90,12 +63,24 @@ function FormProduct() {
    * SHOW ALL PRODUCT
    */
   const showData = useCallback(async () => {
-    const response = await axios(API_URL);
+    const response = await axios(
+      `${API_URL}?sort=${queryParam.sort}&cat=${queryParam.name}&q=${queryParam.q}`
+    );
     setPosts(response.data);
-  }, []);
+  }, [queryParam]);
+
   useEffect(() => {
+    // console.log(queryParam);
     showData();
-  }, []);
+  }, [queryParam]);
+
+  /**
+   * SEARCH
+   */
+
+  function handleChangeQueryParams(params) {
+    setQueryParam(params);
+  }
 
   return (
     <Row className="mt-4 px-4">
@@ -147,63 +132,12 @@ function FormProduct() {
         </Form>
       </Col>
       <Col md={8}>
-        <Form className="mb-2">
-          <Row>
-            <Col></Col>
-            <Col md={8}>
-              <Row>
-                <Col>
-                  <Form.Control
-                    placeholder="name / description"
-                    className={show.searchNama}
-                  />
-                  <div className={show.searchPrice}>
-                    <Row>
-                      <Col>
-                        <Form.Control placeholder="price min" />
-                      </Col>
-                      <Col>
-                        <Form.Control placeholder="price max" />
-                      </Col>
-                    </Row>
-                  </div>
-
-                  <div className={show.searchQty}>
-                    <Row>
-                      <Col>
-                        <Form.Control placeholder="qty min" />
-                      </Col>
-                      <Col>
-                        <Form.Control placeholder="qty max" />
-                      </Col>
-                    </Row>
-                  </div>
-                </Col>
-                <Col>
-                  <Form.Select
-                    onChange={(e) => handleSelectSearchBox(e.target.value)}
-                  >
-                    <option value="name">Name / Description</option>
-                    <option value="price">price</option>
-                    <option value="qty">qty</option>
-                  </Form.Select>
-                </Col>
-
-                <Col>
-                  <Form.Select
-                    onChange={(e) => handleSortingSearchBox(e.target.value)}
-                  >
-                    <option value="asc">A-Z</option>
-                    <option value="desc">Z-A</option>
-                    <option value="qty_asc">qty : Rendah ke Tinggi</option>
-                    <option value="qty_desc">qty : Tinggi ke Rendah</option>
-                  </Form.Select>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </Form>
+        <FormSearch
+          setQueryParam={(a) => handleChangeQueryParams(a)}
+          queryParam={queryParam}
+        />
         <Row>
+          {posts && posts.length < 1 && <p>tidak ada</p>}
           {posts &&
             posts.map((produks) => (
               <ListProduct
