@@ -1,13 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
+import { API_URL } from "../utils/constanta";
 import axios from "axios";
-import ListProductComponent from "./ListProductComponent";
+import ListProduct from "./ListProduct";
 
 function FormProduct() {
-  const url = "http://127.0.0.1:8000/api/v1/product";
-  /**
-   * CREATE
-   */
   const [data, setData] = useState({
     name: "",
     description: "",
@@ -15,19 +12,23 @@ function FormProduct() {
     qty: "",
     image: "",
   });
+  const [posts, setPosts] = useState([]);
+  /**
+   * CREATE
+   */
 
   function submit(params) {
     params.preventDefault();
     axios
-      .post(url, {
-        name: data.name,
+      .post(API_URL, {
+        name: data.name.toUpperCase(),
         description: data.description,
         price: parseInt(data.price),
         qty: parseInt(data.qty),
         image: "a",
       })
       .then((res) => {
-        console.log(res.data);
+        showData();
       });
   }
   function handle(params) {
@@ -37,19 +38,27 @@ function FormProduct() {
   }
 
   /**
-   * LIST
+   * SHOW ALL PRODUCT
    */
-  //  function componentDidMount() {
-  //   axios
-  //     .get(API_URL + "product")
-  //     .then((res) => {
-  //       const produks = res.data;
-  //       this.setState({ produks });
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // }
+  const showData = async () => {
+    const response = await axios(API_URL);
+    setPosts(response.data);
+  };
+  useEffect(() => {
+    showData();
+  }, []);
+
+  /**
+   * DELETE PRODUCT
+   */
+  const deletePost = async (e) => {
+    try {
+      const response = await axios.delete(API_URL + e);
+      showData();
+    } catch (err) {
+      console.log("error" + err);
+    }
+  };
 
   return (
     <Row className="mt-4 px-4">
@@ -97,13 +106,16 @@ function FormProduct() {
         </Form>
       </Col>
       <Col md={8}>
-        <ListProductComponent />
-        {/* <Row>
-          {produks &&
-            produks.map((dataProduk) => (
-              <ListProduct key={dataProduk.id} dataProduk={dataProduk} />
+        <Row>
+          {posts &&
+            posts.map((produks) => (
+              <ListProduct
+                key={produks.id}
+                dataProduk={produks}
+                remove={deletePost}
+              />
             ))}
-        </Row> */}
+        </Row>
       </Col>
     </Row>
   );
