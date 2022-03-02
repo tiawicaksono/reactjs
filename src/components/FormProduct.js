@@ -22,11 +22,11 @@ const defaultValue = {
 };
 
 const sortingValue = {
-  sort: "",
+  sort: "asc",
   q: "",
   cat: "name",
-  min: "",
-  max: "",
+  min: 0,
+  max: 0,
 };
 function FormProduct() {
   const [data, setData] = useState(defaultValue);
@@ -121,7 +121,6 @@ function FormProduct() {
   }
   function renderPagination() {
     if (pagination && pagination.links) {
-      console.log(pagination);
       return (
         <Pagination>
           {pagination.first_page_url && (
@@ -160,67 +159,63 @@ function FormProduct() {
 
   return (
     <Container>
-      {isLoading ? (
-        <Spinner animation="grow" className="mt-4" />
-      ) : (
-        <Row className="mt-4 px-4">
-          <Col md={4}>
-            <Form onSubmit={(e) => submit(e)} className="create-form">
-              <Form.Group className="mb-3">
-                {/* <Form.Label htmlFor="name">Name</Form.Label> */}
-                <Form.Control
-                  onChange={(e) => handle(e)}
-                  id="name"
-                  value={data.name || ""}
-                  type="text"
-                  placeholder="product name"
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Control
-                  onChange={(e) => handle(e)}
-                  id="description"
-                  value={data.description || ""}
-                  as="textarea"
-                  rows={3}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Control
-                  onChange={(e) => handle(e)}
-                  id="price"
-                  value={data.price || ""}
-                  type="number"
-                  placeholder="price"
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Control
-                  onChange={(e) => handle(e)}
-                  id="qty"
-                  value={data.qty || ""}
-                  type="number"
-                  placeholder="qty"
-                />
-              </Form.Group>
-              <Form.Group controlId="formFile" className="mb-3">
-                <Form.Control type="file" onChange={(e) => uploadImage(e)} />
-              </Form.Group>
-              <Button variant="primary" type="submit">
-                Submit
-              </Button>
-            </Form>
-          </Col>
-          <Col md={8}>
-            <FormSearch
-              setQueryParam={(a) => handleChangeQueryParams(a)}
-              queryParam={queryParam}
-            />
-            <Row>{renderItem()}</Row>
-            <Row>{renderPagination()}</Row>
-          </Col>
-        </Row>
-      )}
+      <Row className="mt-4 px-4">
+        <Col md={4}>
+          <Form onSubmit={(e) => submit(e)} className="create-form">
+            <Form.Group className="mb-3">
+              {/* <Form.Label htmlFor="name">Name</Form.Label> */}
+              <Form.Control
+                onChange={(e) => handle(e)}
+                id="name"
+                value={data.name || ""}
+                type="text"
+                placeholder="product name"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Control
+                onChange={(e) => handle(e)}
+                id="description"
+                value={data.description || ""}
+                as="textarea"
+                rows={3}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Control
+                onChange={(e) => handle(e)}
+                id="price"
+                value={data.price || ""}
+                type="number"
+                placeholder="price"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Control
+                onChange={(e) => handle(e)}
+                id="qty"
+                value={data.qty || ""}
+                type="number"
+                placeholder="qty"
+              />
+            </Form.Group>
+            <Form.Group controlId="formFile" className="mb-3">
+              <Form.Control type="file" onChange={(e) => uploadImage(e)} />
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Submit
+            </Button>
+          </Form>
+        </Col>
+        <Col md={8}>
+          <FormSearch
+            setQueryParam={(a) => handleChangeQueryParams(a)}
+            queryParam={queryParam}
+          />
+          <Row>{renderItem()}</Row>
+          <Row>{renderPagination()}</Row>
+        </Col>
+      </Row>
     </Container>
   );
 }

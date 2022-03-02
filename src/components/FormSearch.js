@@ -56,7 +56,7 @@ export const FormSearch = (props) => {
   const handlePriceSearchBox = (type, value) => {
     const newData = { ...props.queryParam };
     newData[type] = value;
-    console.log(newData);
+    // console.log(newData);
     props.setQueryParam(newData);
   };
   return (
