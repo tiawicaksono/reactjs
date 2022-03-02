@@ -20,7 +20,12 @@ const ListProduct = (props) => {
           <Card.Title>{props.dataProduk.name.toUpperCase()}</Card.Title>
           <Card.Text>{description}</Card.Text>
           <Card.Text>Rp.{numberWithCommas(props.dataProduk.price)}</Card.Text>
-          <Button variant="primary">Edit</Button>
+          <Button
+            variant="primary"
+            onClick={() => props.update(props.dataProduk)}
+          >
+            Edit
+          </Button>
           <Button
             variant="danger"
             className="removeButton mx-2"
